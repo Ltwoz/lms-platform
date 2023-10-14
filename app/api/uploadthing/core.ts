@@ -1,6 +1,10 @@
 import { auth } from "@clerk/nextjs";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 
+import { UTApi } from "uploadthing/server";
+
+export const utapi = new UTApi();
+
 const f = createUploadthing();
 
 const handleAuth = () => {
