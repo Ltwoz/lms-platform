@@ -2,13 +2,13 @@ import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
-export async function POST(
+export async function PUT(
   req: Request,
   { params }: { params: { courseId: string } },
 ) {
   try {
     const { userId } = auth();
-    const { title } = await req.json();
+    const { list } = await req.json();
 
     if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
@@ -21,28 +21,16 @@ export async function POST(
 
     if (!courseOwner) return new NextResponse("Unauthorized", { status: 401 });
 
-    const lastChapter = await db.chapter.findFirst({
-      where: {
-        courseId: params.courseId,
-      },
-      orderBy: {
-        position: "desc",
-      },
-    });
+    for (let item of list) {
+      await db.chapter.update({
+        where: { id: item.id },
+        data: { position: item.position },
+      });
+    }
 
-    const newPositon = lastChapter ? lastChapter.position + 1 : 0;
-
-    const chapter = await db.chapter.create({
-      data: {
-        title,
-        courseId: params.courseId,
-        position: newPositon,
-      },
-    });
-
-    return NextResponse.json(chapter);
+    return new NextResponse("Success", { status: 200 });
   } catch (error) {
-    console.log("[CHAPTERS]", error);
+    console.log("[REORDER]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
