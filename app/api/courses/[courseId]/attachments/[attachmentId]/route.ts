@@ -23,7 +23,11 @@ export async function DELETE(
 
     if (!courseOwner) return new NextResponse("Unauthorized", { status: 401 });
 
-    await utapi.deleteFiles(name);
+    try {
+      await utapi.deleteFiles(name);
+    } catch (error) {
+      console.log("[ATTACHMENT_ID_UTAPI_DELETE_FILES]", error);
+    }
 
     const attachment = await db.attachment.delete({
       where: {
